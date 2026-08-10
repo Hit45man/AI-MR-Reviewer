@@ -25,7 +25,7 @@ spec:
             - name: LITELLM_URL
               value: http://litellm.platform.svc.cluster.local:4000
             - name: PRIMARY_MODEL
-              value: nova-pro
+              value: nova-micro
             - name: FALLBACK_MODEL
               value: nova-lite
             - name: EMBEDDING_MODEL

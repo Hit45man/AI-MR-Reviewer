@@ -3,14 +3,20 @@
 
 model_list:
   # ap-south-1 requires cross-region inference profiles (on-demand model IDs return 400)
-  - model_name: nova-pro
+  # POC: nova-micro uses the fewest tokens for a couple of successful reviews
+  - model_name: nova-micro
     litellm_params:
-      model: bedrock/apac.amazon.nova-pro-v1:0
+      model: bedrock/apac.amazon.nova-micro-v1:0
       aws_region_name: os.environ/AWS_REGION
 
   - model_name: nova-lite
     litellm_params:
       model: bedrock/apac.amazon.nova-lite-v1:0
+      aws_region_name: os.environ/AWS_REGION
+
+  - model_name: nova-pro
+    litellm_params:
+      model: bedrock/apac.amazon.nova-pro-v1:0
       aws_region_name: os.environ/AWS_REGION
 
   # Optional third chat alias (Meta on Bedrock) — enable in Bedrock console first

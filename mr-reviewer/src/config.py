@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     # LiteLLM → Amazon Bedrock only (aliases from litellm/proxy_config.yaml)
     litellm_url: str = "http://litellm.mr-reviewer-dev.local:4000"
     litellm_api_key: str = ""
-    primary_model: str = "nova-pro"
+    primary_model: str = "nova-micro"
     fallback_model: str = "nova-lite"
     embedding_model: str = "titan-embed-v2"
 

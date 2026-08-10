@@ -17,7 +17,7 @@ tokenizer = tiktoken.get_encoding("cl100k_base")
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBED_TOKEN_BUDGET = 8_000  # stay under Titan input limits
-_MAX_RETRIES = 5
+_MAX_RETRIES = 2  # fail fast under Bedrock throttle so chat review can still run
 
 
 def chunk_text(text: str, file_path: str) -> list[dict]:
