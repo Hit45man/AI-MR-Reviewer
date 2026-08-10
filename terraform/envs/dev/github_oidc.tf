@@ -2,9 +2,13 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["ffffffffffffffffffffffffffffffffffffffff"]
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
+  # Official GitHub Actions OIDC thumbprints
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b9ad698bea4abfa18ac",
+  ]
 
   tags = {
     Name = "${var.project}-${var.env}-github-oidc"
@@ -38,7 +42,11 @@ resource "aws_iam_role" "github_actions" {
       Principal = {
         Federated = aws_iam_openid_connect_provider.github.arn
       }
-      Action = "sts:AssumeRoleWithWebIdentity"
+      # sts:TagSession is required by aws-actions/configure-aws-credentials@v4
+      Action = [
+        "sts:AssumeRoleWithWebIdentity",
+        "sts:TagSession",
+      ]
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
