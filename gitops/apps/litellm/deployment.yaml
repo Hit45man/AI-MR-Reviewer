@@ -8,13 +8,17 @@ data:
   proxy_config.yaml: |
     # synced from ../../litellm/proxy_config.yaml — keep in sync
     model_list:
-      - model_name: nova-pro
+      - model_name: nova-micro
         litellm_params:
-          model: bedrock/apac.amazon.nova-pro-v1:0
+          model: bedrock/apac.amazon.nova-micro-v1:0
           aws_region_name: os.environ/AWS_REGION
       - model_name: nova-lite
         litellm_params:
           model: bedrock/apac.amazon.nova-lite-v1:0
+          aws_region_name: os.environ/AWS_REGION
+      - model_name: nova-pro
+        litellm_params:
+          model: bedrock/apac.amazon.nova-pro-v1:0
           aws_region_name: os.environ/AWS_REGION
       - model_name: titan-embed-v2
         litellm_params:
