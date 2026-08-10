@@ -55,10 +55,7 @@ resource "aws_iam_role_policy_attachment" "node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-resource "aws_iam_role_policy_attachment" "node_ebs" {
-  role       = aws_iam_role.node.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-}
+# EBS CSI omitted for POC (needs IRSA + often times out). Re-add later if you need PVs.
 
 # --- Cluster security group (extra rules for POC) ---
 resource "aws_security_group" "cluster_additional" {
@@ -119,7 +116,6 @@ resource "aws_eks_node_group" "this" {
     aws_iam_role_policy_attachment.node_worker,
     aws_iam_role_policy_attachment.node_cni,
     aws_iam_role_policy_attachment.node_ecr,
-    aws_iam_role_policy_attachment.node_ebs,
   ]
 
   tags = { Name = "${local.cluster_name}-node" }
@@ -166,10 +162,6 @@ resource "aws_eks_addon" "kube_proxy" {
   depends_on                  = [aws_eks_node_group.this]
 }
 
-resource "aws_eks_addon" "ebs_csi" {
-  cluster_name                = aws_eks_cluster.this.name
-  addon_name                  = "aws-ebs-csi-driver"
-  resolve_conflicts_on_create = "OVERWRITE"
-  resolve_conflicts_on_update = "OVERWRITE"
-  depends_on                  = [aws_eks_node_group.this]
-}
+# aws-ebs-csi-driver intentionally not installed for POC (common timeout without IRSA;
+# Argo CD + apps use emptyDir / no PersistentVolumes).
+

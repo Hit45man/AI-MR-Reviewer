@@ -35,6 +35,12 @@ variable "node_instance_type" {
   default     = "t3.medium"
 }
 
+variable "cluster_version" {
+  description = "EKS Kubernetes version (must be currently supported by AWS)"
+  type        = string
+  default     = "1.34"
+}
+
 variable "node_desired_size" {
   description = "Managed node group size (POC: 1)"
   type        = number

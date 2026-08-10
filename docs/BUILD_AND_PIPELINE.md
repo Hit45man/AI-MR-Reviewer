@@ -66,18 +66,20 @@ Here it is **GitHub Actions** → **ECR** → bump in-repo `gitops/` → **Argo 
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `AWS_ROLE_TO_ASSUME` | secret | IAM role ARN for OIDC (ECR push) |
-| `AWS_ACCOUNT_ID` | secret | 12-digit account id |
-| `AWS_REGION` | variable | e.g. `ap-south-1` |
+| `AWS_ROLE_TO_ASSUME` | secret | IAM role ARN for OIDC (ECR push) — Terraform output `github_actions_role_arn` |
+| `AWS_ACCOUNT_ID` | secret | 12-digit account id — Terraform output `aws_account_id` |
+| `AWS_REGION` | variable | e.g. `ap-south-1` (optional; workflow defaults to `ap-south-1`) |
 
-Also create ECR repo once:
+After `terraform apply` in `terraform/envs/dev`:
 
 ```bash
-aws ecr create-repository --repository-name mr-reviewer --region ap-south-1
+terraform output github_actions_role_arn
+terraform output aws_account_id
 ```
 
-Trust policy on the IAM role must allow `token.actions.githubusercontent.com` for this repo.
+Add those as **GitHub → repo Settings → Secrets and variables → Actions**.
 
+ECR repo `mr-reviewer` is created by Terraform (`aws_ecr_repository.mr_reviewer`).
 ## What is NOT automated yet
 
 - Terraform apply (run separately / Atlantis / another workflow)

@@ -74,6 +74,7 @@ module "eks" {
   node_desired_size  = var.node_desired_size
   node_min_size      = var.node_desired_size
   node_max_size      = max(var.node_desired_size, 1)
+  cluster_version    = var.cluster_version
 }
 
 module "rds" {

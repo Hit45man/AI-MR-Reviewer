@@ -64,13 +64,14 @@ resource "helm_release" "aws_lbc" {
 }
 
 # Argo CD + root Application (Application CR created by the chart — avoids CRD plan race)
+# OCI pull from ghcr.io is often more reliable than GitHub release-assets redirects.
 resource "helm_release" "argocd" {
   name             = "argocd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
+  chart            = "oci://ghcr.io/argoproj/argo-helm/argo-cd"
   namespace        = "argocd"
   create_namespace = true
   version          = "6.7.18"
+  timeout          = 900
 
   values = [
     yamlencode({

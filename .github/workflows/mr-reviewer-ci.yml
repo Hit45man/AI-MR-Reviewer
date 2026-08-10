@@ -42,6 +42,17 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
+      - name: Require AWS CI secrets
+        env:
+          ROLE: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          if [ -z "$ROLE" ] || [ -z "$ACCOUNT" ]; then
+            echo "::error::Missing GitHub secrets. Set AWS_ROLE_TO_ASSUME and AWS_ACCOUNT_ID."
+            echo "After terraform apply, use outputs: github_actions_role_arn and aws_account_id"
+            exit 1
+          fi
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
