@@ -86,6 +86,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update deployment image tag
         env:
@@ -109,4 +112,6 @@ jobs:
             exit 0
           fi
           git commit -m "ci(mr-reviewer): bump image to ${{ needs.build.outputs.short_sha }}"
-          git push
+          # main may have moved (docs/terraform pushes); rebase then push
+          git pull --rebase origin main
+          git push origin HEAD:main
