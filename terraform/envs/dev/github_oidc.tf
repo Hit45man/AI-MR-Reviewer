@@ -30,7 +30,10 @@ resource "aws_ecr_repository" "mr_reviewer" {
 }
 
 locals {
-  github_repo = "Hit45man/AI-MR-Reviewer"
+  github_repo    = "Hit45man/AI-MR-Reviewer"
+  # GitHub immutable OIDC sub (repos created after Jul 2026): repo:owner@OWNER_ID/name@REPO_ID:...
+  github_owner_id = "78225117"
+  github_repo_id  = "1329816649"
 }
 
 resource "aws_iam_role" "github_actions" {
@@ -52,7 +55,12 @@ resource "aws_iam_role" "github_actions" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${local.github_repo}:*"
+          "token.actions.githubusercontent.com:sub" = [
+            # Legacy name-only format
+            "repo:${local.github_repo}:*",
+            # Immutable ID format (this repo — from CloudTrail)
+            "repo:Hit45man@${local.github_owner_id}/AI-MR-Reviewer@${local.github_repo_id}:*",
+          ]
         }
       }
     }]
