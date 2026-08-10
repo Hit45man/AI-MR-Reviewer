@@ -33,7 +33,7 @@ spec:
             - name: GITHUB_API_URL
               value: https://api.github.com
             - name: WATCHED_REPOS
-              value: my-org/terraform-infra,my-org/gitops
+              value: Hit45man/AI-MR-Reviewer
             - name: LITELLM_API_KEY
               valueFrom:
                 secretKeyRef:
