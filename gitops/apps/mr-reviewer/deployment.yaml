@@ -18,7 +18,7 @@ spec:
       containers:
         - name: mr-reviewer
           # CI bumps this tag (see .github/workflows/mr-reviewer-ci.yml)
-          image: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/mr-reviewer:pending
+          image: 225595536111.dkr.ecr.ap-south-1.amazonaws.com/mr-reviewer:e2d3d74
           ports:
             - containerPort: 8080
           env:
