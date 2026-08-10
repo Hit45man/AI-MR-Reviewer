@@ -31,9 +31,12 @@ resource "aws_iam_role_policy" "litellm_bedrock" {
         "bedrock:InvokeModelWithResponseStream",
       ]
       Resource = [
-        "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-pro-v1:0",
-        "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.nova-lite-v1:0",
-        "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-embed-text-v2:0",
+        # On-demand + APAC cross-region inference profiles (required in ap-south-1)
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0",
+        "arn:aws:bedrock:${var.aws_region}:*:inference-profile/apac.amazon.nova-pro-v1:0",
+        "arn:aws:bedrock:${var.aws_region}:*:inference-profile/apac.amazon.nova-lite-v1:0",
       ]
     }]
   })

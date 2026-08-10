@@ -2,14 +2,15 @@
 # No Anthropic API, Vertex, Azure OpenAI, or OpenAI.com entries.
 
 model_list:
+  # ap-south-1 requires cross-region inference profiles (on-demand model IDs return 400)
   - model_name: nova-pro
     litellm_params:
-      model: bedrock/amazon.nova-pro-v1:0
+      model: bedrock/apac.amazon.nova-pro-v1:0
       aws_region_name: os.environ/AWS_REGION
 
   - model_name: nova-lite
     litellm_params:
-      model: bedrock/amazon.nova-lite-v1:0
+      model: bedrock/apac.amazon.nova-lite-v1:0
       aws_region_name: os.environ/AWS_REGION
 
   # Optional third chat alias (Meta on Bedrock) — enable in Bedrock console first
