@@ -1,0 +1,27 @@
+# Optional: validate Python package on PRs (no AWS push).
+name: mr-reviewer-pr-checks
+
+on:
+  pull_request:
+    paths:
+      - "mr-reviewer/**"
+      - ".github/workflows/mr-reviewer-pr-checks.yml"
+
+jobs:
+  lint-and-import:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mr-reviewer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Syntax / import smoke
+        run: |
+          python -c "import ast, pathlib; [ast.parse(p.read_text()) for p in pathlib.Path('src').rglob('*.py')]"
+      - name: Docker build (no push)
+        run: docker build -t mr-reviewer:pr .

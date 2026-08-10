@@ -1,0 +1,101 @@
+# Build & push mr-reviewer image, then bump gitops image tag.
+# Mirrors Horizon's GitLab CI (build → bump-gitops), adapted for GitHub + AWS ECR.
+
+name: mr-reviewer-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mr-reviewer/**"
+      - ".github/workflows/mr-reviewer-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # OIDC → AWS (no long-lived keys)
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  ECR_REPOSITORY: mr-reviewer
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mr-reviewer
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: meta
+        run: |
+          SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=${SHORT}" >> "$GITHUB_OUTPUT"
+          echo "image=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${SHORT}" >> "$GITHUB_OUTPUT"
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          SHORT=${{ steps.meta.outputs.short_sha }}
+          IMAGE="${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${SHORT}"
+          docker build -t "$IMAGE" .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Push image
+        run: |
+          docker push "$IMAGE"
+          # optional mutable tag for digests in non-prod only — prefer SHA in prod
+          docker tag "$IMAGE" "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:main"
+          docker push "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:main"
+
+  bump-gitops:
+    name: Bump gitops image tag
+    needs: [build]
+    runs-on: ubuntu-latest
+    # Requires a PAT or GitHub App token with contents:write on this repo (or a separate gitops repo)
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update deployment image tag
+        env:
+          SHORT: ${{ needs.build.outputs.short_sha }}
+          ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          REGION: ${{ env.AWS_REGION }}
+        run: |
+          FILE=gitops/apps/mr-reviewer/deployment.yaml
+          NEW_IMAGE="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/mr-reviewer:${SHORT}"
+          # Replace the placeholder image line
+          sed -i -E "s|image: .*mr-reviewer:.*|image: ${NEW_IMAGE}|" "$FILE"
+          grep -n "image:" "$FILE"
+
+      - name: Commit and push
+        run: |
+          git config user.name "mr-reviewer-ci"
+          git config user.email "mr-reviewer-ci@users.noreply.github.com"
+          git add gitops/apps/mr-reviewer/deployment.yaml
+          if git diff --staged --quiet; then
+            echo "No gitops change"
+            exit 0
+          fi
+          git commit -m "ci(mr-reviewer): bump image to ${{ needs.build.outputs.short_sha }}"
+          git push

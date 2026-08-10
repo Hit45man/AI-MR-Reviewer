@@ -1,0 +1,8 @@
+# Namespace is also created by Terraform (addons.tf). Kept here so Argo CD
+# can reconcile if applying gitops alone. Harmless if already present.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform
+  labels:
+    app.kubernetes.io/part-of: aws-mr-reviewer

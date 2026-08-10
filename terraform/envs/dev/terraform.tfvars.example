@@ -1,0 +1,23 @@
+aws_region     = "ap-south-1"
+env            = "dev"
+project        = "mr-reviewer"
+vpc_cidr       = "10.40.0.0/16"
+db_username    = "mr_reviewer"
+watched_repos  = "my-org/terraform-infra,my-org/gitops"
+
+# EKS POC: single small managed node
+node_instance_type = "t3.medium"
+node_desired_size  = 1
+
+# Argo CD root Application source (change to your fork/remote)
+git_repo_url      = "https://github.com/Hit45man/AI-MR-Reviewer.git"
+git_repo_revision = "HEAD"
+
+tags = {
+  env         = "dev"
+  team        = "platform"
+  workload    = "mr-reviewer"
+  cost-center = "cc-platform"
+  data-class  = "confidential"
+  managed-by  = "terraform"
+}

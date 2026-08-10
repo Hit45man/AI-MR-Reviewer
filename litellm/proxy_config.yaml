@@ -1,0 +1,33 @@
+# LiteLLM proxy config — Amazon Bedrock ONLY
+# No Anthropic API, Vertex, Azure OpenAI, or OpenAI.com entries.
+
+model_list:
+  - model_name: nova-pro
+    litellm_params:
+      model: bedrock/amazon.nova-pro-v1:0
+      aws_region_name: os.environ/AWS_REGION
+
+  - model_name: nova-lite
+    litellm_params:
+      model: bedrock/amazon.nova-lite-v1:0
+      aws_region_name: os.environ/AWS_REGION
+
+  # Optional third chat alias (Meta on Bedrock) — enable in Bedrock console first
+  # - model_name: llama-70b
+  #   litellm_params:
+  #     model: bedrock/meta.llama3-3-70b-instruct-v1:0
+  #     aws_region_name: os.environ/AWS_REGION
+
+  - model_name: titan-embed-v2
+    litellm_params:
+      model: bedrock/amazon.titan-embed-text-v2:0
+      aws_region_name: os.environ/AWS_REGION
+
+litellm_settings:
+  drop_params: true
+  # Auth via IRSA (EKS service account) — no static AWS keys in config
+  # Ensure the runtime role has bedrock:InvokeModel on the models above.
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL

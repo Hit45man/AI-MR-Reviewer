@@ -1,0 +1,11 @@
+# Ignore local terraform / secrets
+**/.terraform/
+*.tfstate*
+*.tfvars
+!*.tfvars.example
+.env
+*.pem
+__pycache__/
+.venv/
+dist/
+*.egg-info/
