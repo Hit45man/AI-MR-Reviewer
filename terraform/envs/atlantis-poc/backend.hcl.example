@@ -1,0 +1,10 @@
+# Copy to backend.hcl (gitignored) and run:
+#   terraform init -backend-config=backend.hcl
+#
+# Must match terraform/bootstrap outputs (S3 + DynamoDB lock).
+
+bucket         = "mr-reviewer-dev-tfstate"
+key            = "atlantis-poc/terraform.tfstate"
+region         = "ap-south-1"
+dynamodb_table = "mr-reviewer-dev-tfstate-lock"
+encrypt        = true

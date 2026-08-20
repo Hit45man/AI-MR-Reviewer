@@ -78,6 +78,26 @@
 11. Run full index: `POST /index` or `scripts/bootstrap_index.sh`.
 12. Open a test PR with a known violation; confirm PR comment.
 
+## Atlantis POC (standalone EC2 — apply server only)
+
+Use **`terraform/envs/atlantis-poc`** first: it applies **`modules/networking`** (shared VPC) + Atlantis EC2. Keep `enable_atlantis = false` in `envs/dev`; that stack reads the VPC via remote state and is applied from GitHub PRs.
+
+1. Ensure bootstrap exists: `terraform/bootstrap` (S3 + DynamoDB).
+2. ```powershell
+   cd C:\Web-PT\aws-mr-reviewer\terraform\envs\atlantis-poc
+   copy terraform.tfvars.example terraform.tfvars
+   copy backend.hcl.example backend.hcl
+   # edit terraform.tfvars / backend.hcl as needed (not committed)
+   terraform init "-backend-config=backend.hcl"
+   terraform apply
+   ```
+   This creates the platform VPC (public/private + NAT) and Atlantis in a public subnet.
+3. Put GitHub PAT JSON in Secrets Manager (`atlantis_vcs_secret_arn` output), then SSM: `sudo systemctl restart atlantis`.
+4. Register GitHub webhook → `atlantis_webhook_url` (`/events`).
+5. Open a PR changing `terraform/envs/dev` → Atlantis plans EKS/RDS/Argo into the **same VPC**; comment `atlantis apply`.
+
+Do **not** put `terraform/bootstrap` under Atlantis. Avoid local `terraform apply` on `envs/dev` while Atlantis holds the lock.
+
 ## Terraform remote state
 
 | Resource | Name |

@@ -41,16 +41,22 @@ provider "aws" {
 
 locals {
   cluster_name = "${var.project}-${var.env}"
+
+  # VPC from terraform/envs/atlantis-poc (modules/networking) — single shared network
+  vpc_id                = data.terraform_remote_state.atlantis_poc.outputs.vpc_id
+  public_subnet_ids     = data.terraform_remote_state.atlantis_poc.outputs.public_subnet_ids
+  private_subnet_ids    = data.terraform_remote_state.atlantis_poc.outputs.private_subnet_ids
+  app_security_group_id = data.terraform_remote_state.atlantis_poc.outputs.app_security_group_id
 }
 
-module "networking" {
-  source = "../../modules/networking"
-
-  project      = var.project
-  env          = var.env
-  vpc_cidr     = var.vpc_cidr
-  aws_region   = var.aws_region
-  cluster_name = local.cluster_name
+# VPC lives in terraform/envs/atlantis-poc (modules/networking). Do not recreate it here.
+data "terraform_remote_state" "atlantis_poc" {
+  backend = "s3"
+  config = {
+    bucket = var.atlantis_poc_state_bucket
+    key    = var.atlantis_poc_state_key
+    region = var.aws_region
+  }
 }
 
 module "secrets" {
@@ -66,9 +72,9 @@ module "eks" {
   project            = var.project
   env                = var.env
   aws_region         = var.aws_region
-  vpc_id             = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
-  public_subnet_ids  = module.networking.public_subnet_ids
+  vpc_id             = local.vpc_id
+  private_subnet_ids = local.private_subnet_ids
+  public_subnet_ids  = local.public_subnet_ids
 
   node_instance_type = var.node_instance_type
   node_desired_size  = var.node_desired_size
@@ -82,12 +88,12 @@ module "rds" {
 
   project            = var.project
   env                = var.env
-  vpc_id             = module.networking.vpc_id
-  private_subnet_ids = module.networking.private_subnet_ids
+  vpc_id             = local.vpc_id
+  private_subnet_ids = local.private_subnet_ids
   db_username        = var.db_username
   allowed_sg_ids = [
     module.eks.cluster_security_group_id,
-    module.networking.app_security_group_id,
+    local.app_security_group_id,
   ]
   kms_key_arn = module.secrets.kms_key_arn
 }

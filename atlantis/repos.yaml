@@ -1,0 +1,8 @@
+# Reference copy of the Atlantis server-side repo config.
+# The live copy is written by EC2 user-data to /opt/atlantis/repos.yaml.
+# Keep apply_requirements empty for POC; add "approved" / "mergeable" later.
+repos:
+  - id: /.*/
+    apply_requirements: []
+    allowed_overrides: [workflow, apply_requirements, delete_source_branch_on_merge]
+    allow_custom_workflows: true
