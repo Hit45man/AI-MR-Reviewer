@@ -57,7 +57,7 @@ resource "helm_release" "aws_lbc" {
   }
   set {
     name  = "vpcId"
-    value = module.networking.vpc_id
+    value = local.vpc_id
   }
 
   depends_on = [module.eks]
