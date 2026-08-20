@@ -13,7 +13,7 @@ kms_key_arn           = ""
 
 atlantis_instance_type       = "t3.small"
 atlantis_root_volume_gb      = 30
-atlantis_image               = "ghcr.io/runatlantis/atlantis:v0.30.0"
+atlantis_image               = "ghcr.io/runatlantis/atlantis:v0.42.0"
 atlantis_repo_allowlist      = "github.com/Hit45man/AI-MR-Reviewer"
 atlantis_webhook_cidr_blocks = ["0.0.0.0/0"]
 atlantis_attach_admin_access = true

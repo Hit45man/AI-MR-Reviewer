@@ -3,6 +3,7 @@
 # This file tells that server to plan/apply terraform/envs/dev on PRs.
 # GitOps (gitops/) stays with Argo CD.
 #
+# Requires Atlantis >= v0.42.0 (fixes HashiCorp GPG key expiry on TF download).
 # PR comments: `atlantis plan` | `atlantis apply` | `atlantis unlock`
 version: 3
 
@@ -10,7 +11,6 @@ projects:
   - name: mr-reviewer-dev
     dir: terraform/envs/dev
     workspace: default
-    # Avoid older TF releases — Atlantis GPG checksum verify fails with "openpgp: key expired"
     terraform_version: v1.10.5
     autoplan:
       enabled: true
