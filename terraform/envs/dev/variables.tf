@@ -125,7 +125,7 @@ variable "atlantis_repo_allowlist" {
 
 variable "atlantis_image" {
   type    = string
-  default = "ghcr.io/runatlantis/atlantis:v0.30.0"
+  default = "ghcr.io/runatlantis/atlantis:v0.42.0"
 }
 
 variable "atlantis_attach_admin_access" {

@@ -50,7 +50,7 @@ variable "repo_allowlist" {
 variable "atlantis_image" {
   description = "Atlantis container image"
   type        = string
-  default     = "ghcr.io/runatlantis/atlantis:v0.30.0"
+  default     = "ghcr.io/runatlantis/atlantis:v0.42.0"
 }
 
 variable "state_bucket_name" {
