@@ -63,7 +63,10 @@ resource "helm_release" "aws_lbc" {
   depends_on = [module.eks]
 }
 
-# Argo CD (OCI is more reliable than GitHub release-assets redirects)
+# Argo CD (OCI is more reliable than GitHub release-assets redirects).
+# Root Application is installed via Helm extraObjects so terraform plan does not
+# need kubernetes_manifest (which requires a live API / OpenAPI at plan time — breaks
+# Atlantis when EKS is created in the same apply).
 resource "helm_release" "argocd" {
   name             = "argocd"
   chart            = "oci://ghcr.io/argoproj/argo-helm/argo-cd"
@@ -84,47 +87,43 @@ resource "helm_release" "argocd" {
           type = "ClusterIP"
         }
       }
+      extraObjects = [
+        {
+          apiVersion = "argoproj.io/v1alpha1"
+          kind       = "Application"
+          metadata = {
+            name       = "aws-mr-reviewer"
+            namespace  = "argocd"
+            finalizers = ["resources-finalizer.argocd.argoproj.io"]
+          }
+          spec = {
+            project = "default"
+            source = {
+              repoURL        = var.git_repo_url
+              targetRevision = var.git_repo_revision
+              path           = "gitops"
+              directory = {
+                recurse = true
+              }
+            }
+            destination = {
+              server    = "https://kubernetes.default.svc"
+              namespace = "platform"
+            }
+            syncPolicy = {
+              automated = {
+                prune    = true
+                selfHeal = true
+              }
+              syncOptions = [
+                "CreateNamespace=true",
+              ]
+            }
+          }
+        },
+      ]
     }),
   ]
 
   depends_on = [module.eks, helm_release.aws_lbc]
-}
-
-# Root Application — sync this repo's gitops/ (helm chart "applications:" was not creating the CR)
-resource "kubernetes_manifest" "argocd_root_app" {
-  manifest = {
-    apiVersion = "argoproj.io/v1alpha1"
-    kind       = "Application"
-    metadata = {
-      name       = "aws-mr-reviewer"
-      namespace  = "argocd"
-      finalizers = ["resources-finalizer.argocd.argoproj.io"]
-    }
-    spec = {
-      project = "default"
-      source = {
-        repoURL        = var.git_repo_url
-        targetRevision = var.git_repo_revision
-        path           = "gitops"
-        directory = {
-          recurse = true
-        }
-      }
-      destination = {
-        server    = "https://kubernetes.default.svc"
-        namespace = "platform"
-      }
-      syncPolicy = {
-        automated = {
-          prune    = true
-          selfHeal = true
-        }
-        syncOptions = [
-          "CreateNamespace=true",
-        ]
-      }
-    }
-  }
-
-  depends_on = [helm_release.argocd]
 }
