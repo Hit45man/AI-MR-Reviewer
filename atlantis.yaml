@@ -1,0 +1,19 @@
+# Atlantis project config for this monorepo.
+# Atlantis server is deployed from terraform/envs/atlantis-poc (standalone).
+# This file tells that server to plan/apply terraform/envs/dev on PRs.
+# GitOps (gitops/) stays with Argo CD.
+#
+# PR comments: `atlantis plan` | `atlantis apply` | `atlantis unlock`
+version: 3
+
+projects:
+  - name: mr-reviewer-dev
+    dir: terraform/envs/dev
+    workspace: default
+    terraform_version: v1.5.7
+    autoplan:
+      enabled: true
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "../../modules/**/*.tf"

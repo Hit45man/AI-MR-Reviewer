@@ -32,7 +32,9 @@ GitHub pull_request / issue_comment webhook
 | Path | Purpose |
 |------|---------|
 | `docs/` | Naming + platform standards + setup (GitHub) |
-| `terraform/` | VPC, RDS, secrets, EKS + IRSA + Argo CD; `bootstrap/` = S3 remote state |
+| `terraform/` | VPC, RDS, secrets, EKS + IRSA + Argo CD; `bootstrap/` = S3 remote state; `envs/atlantis-poc` = Atlantis EC2 only; `modules/atlantis-ec2` |
+| `atlantis.yaml` | Atlantis project config (`terraform/envs/dev` only) |
+| `atlantis/` | Reference Atlantis server `repos.yaml` |
 | `litellm/` | Bedrock-only `proxy_config.yaml` |
 | `mr-reviewer/` | Reviewer app (GitHub App / PAT) |
 | `gitops/` | Deploy manifests (Argo CD target) |
