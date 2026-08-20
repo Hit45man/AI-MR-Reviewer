@@ -10,7 +10,8 @@ projects:
   - name: mr-reviewer-dev
     dir: terraform/envs/dev
     workspace: default
-    terraform_version: v1.5.7
+    # Avoid older TF releases — Atlantis GPG checksum verify fails with "openpgp: key expired"
+    terraform_version: v1.10.5
     autoplan:
       enabled: true
       when_modified:
